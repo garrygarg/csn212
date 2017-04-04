@@ -1,0 +1,149 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+struct interval{
+        int low, high;
+};
+ 
+struct node{
+        interval *i;
+        int max;
+        node *left, *right;
+};
+ 
+node* newNode(interval i){
+    node *temp = new node;
+    temp->i = new interval(i);
+    temp->max = i.high;
+    temp->left = temp->right = NULL;
+
+    return temp; 
+};
+
+node* insert(node *head, interval i){
+    if (head == NULL)
+        return newNode(i);
+    int l = head->i->low;
+
+    if (i.low < l){
+        head->left = insert(head->left, i);
+    }
+    else{
+        head->right = insert(head->right, i);
+    }
+    if (head->max < i.high)
+        head->max = i.high; 
+    return head;
+}
+ 
+interval* search(node *head, interval i){
+    if (head == NULL)
+        return NULL;
+    
+    if ((head->i)->low <= i.high && i.low <= (head->i)->high){
+        return head->i;
+    }
+
+    if (head->left != NULL && head->left->max >= i.low){
+        return search(head->left, i);
+    }
+    return search(head->right, i);
+}
+
+node* minLowInterval(node* n){
+    node *current = n;
+    while (current->left != NULL)
+        current = current->left;
+ 
+    return current;
+}
+
+int findMax(int a,int b,int c){
+    return a>b?(a>c?a:c):(b>c?b:c);
+}
+
+node* Delete(node *head,interval i){
+    if(head==NULL){
+        return NULL;
+    }
+    if(i.low<(head->i)->low){
+        head->left = Delete(head->left,i);
+    }
+    else if(i.low>(head->i)->low){
+        head->right = Delete(head->right,i);
+    }
+    else if(i.low==(head->i)->low ){
+        if(i.high==(head->i)->high){
+            if(head->left==NULL){
+                node *temp=head->right;
+                free(head);
+                return temp;
+            }
+            else if(head->right==NULL){
+                node *temp=head->left;
+                free(head);
+                return temp;
+            }
+            node *temp=minLowInterval(head->right);
+            head->i=temp->i;
+            head->right = Delete(head->right,*(temp->i));
+        }
+        else{
+            head->right = Delete(head->right,i);
+        }
+    }
+    head->max = findMax(head->i->high,((head->left!=NULL)?head->left->max:INT_MIN),((head->right!=NULL)?head->right->max:INT_MIN));
+    return head;
+}
+
+void inorder(node *head){
+    if (head == NULL) 
+        return;
+    inorder(head->left); 
+    cout << "[" << head->i->low << ", " << head->i->high << "]"
+         << " max = " << head->max << endl;
+    inorder(head->right);
+}
+ 
+int main(){
+    
+    vector<interval > v;
+    v.push_back({15,20});
+    v.push_back({10,30});
+    v.push_back({17,19});
+    v.push_back({5,20});
+    v.push_back({12,15});
+    v.push_back({30,40});
+    
+    node *head = NULL;
+    for (int i = 0; i < v.size(); i++)
+        head = insert(head, v[i]);
+ 
+    interval temp = { 14, 16 };
+    cout << "Searching for interval [" << temp.low << "," << temp.high << "]";
+    interval *ans = search(head, temp);
+    if (ans == NULL)
+        cout << "\nNo Overlapping interval";
+    else
+        cout << "\nOverlaps with [" << ans->low << ", " << ans->high << "]"<<endl;
+
+    temp = { 21,23 };
+    cout << "Searching for interval [" << temp.low << "," << temp.high << "]";
+    ans = search(head, temp);
+    if (ans == NULL)
+        cout << "\nNo Overlapping interval";
+    else
+        cout << "\nOverlaps with [" << ans->low << ", " << ans->high << "]"<<endl;
+    
+
+    cout << "\nInorder traversal of constructed Interval Tree is\n";
+    inorder(head);
+    temp= {5,20};
+    cout << "\nDeleting interval [" << temp.low << "," << temp.high << "]";
+    head = Delete(head,temp);
+    cout << "\nInorder traversal of Interval Tree after deleting an interval is\n";
+    inorder(head);
+
+
+    return 0;
+}
