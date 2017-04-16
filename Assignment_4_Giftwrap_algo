@@ -58,7 +58,7 @@ void giftwrap(Point points[], int n)
 int main() {
 	
 	
-	Point points[] = {{7,0}, {2, 5}, {8,12}, {2,56,
+	Point points[] = {{7,0}, {2, 5}, {8,12}, {2,56},
                       {8,0}, {0, 0}, {3, 3},{0,9}};
     int n = sizeof(points)/sizeof(points[0]);
     giftwrap(points, n);
